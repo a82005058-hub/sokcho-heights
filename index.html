@@ -20,10 +20,17 @@ section{padding:110px 24px}.wrap{max-width:1180px;margin:auto}.kicker{display:bl
 .location{background:var(--navy);color:#fff}.location-grid{display:grid;grid-template-columns:1fr 1fr;gap:55px;align-items:center}.location .lead{color:#c8d0d8}.location img{width:100%;background:white;padding:8px}.loc-list{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:30px}.loc{padding:18px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04)}.loc b{color:#e2c58f}.plans{background:#f7f7f5}.plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:40px}.plan{background:#fff;border:1px solid var(--line)}.plan img{width:100%;display:block}.plan-txt{padding:24px}.plan-txt b{font-size:28px}.plan-txt span{float:right;color:#8a6c3d}.siteplan{background:#fff}.siteplan img{width:100%;display:block;margin-top:35px}
 .contact{background:linear-gradient(135deg,#0b1727,#1a324e);color:#fff}.contact-box{display:grid;grid-template-columns:1fr 1fr;gap:60px}.contact .lead{color:#c6d0dc}.form{display:grid;gap:12px}.form input,.form select,.form textarea{width:100%;padding:16px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#fff;font:inherit}.form select option{color:#111}.form textarea{height:110px;resize:vertical}.form button{border:0;padding:17px;background:var(--gold);font-weight:900;cursor:pointer}
 footer{padding:58px 24px 96px;background:#292929;color:#fff;text-align:center}.foot{max-width:1380px;margin:auto}.foot-brand{font-size:28px;font-weight:900;line-height:1.2}.foot-brand small{display:block;margin-top:6px;color:#d9b878;font-size:13px;letter-spacing:2px}.foot-call{margin:24px 0 22px;font-size:24px;font-weight:800}.foot-call a{color:#fff;font-size:52px;letter-spacing:1px}.foot-notice{margin:10px 0;color:#eef1f4;font-size:16px;font-weight:700;line-height:1.7}.foot-address{font-size:17px}.foot-copy{margin-top:14px;color:#fff}.floating{position:fixed;z-index:40;right:20px;bottom:20px;background:var(--gold);color:#121212;padding:15px 21px;border-radius:999px;font-weight:900;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-@media(max-width:900px){.links{display:none}.nav{height:66px}.call{margin-left:auto}.hero{min-height:700px}.hero-in{padding-bottom:80px}.hero h1{font-size:45px}.hero p{font-size:16px}.quick-in{grid-template-columns:1fr 1fr}.overview-grid,.location-grid,.contact-box{grid-template-columns:1fr}.cards,.plan-grid{grid-template-columns:1fr}.title{font-size:36px}section{padding:78px 18px}.loc-list{grid-template-columns:1fr}.buttons{flex-direction:column;align-items:flex-start}footer{padding:44px 18px 108px}.foot-call{font-size:18px}.foot-call a{display:block;margin-top:5px;font-size:38px}.foot-notice,.foot-address{font-size:13px}.floating{left:16px;right:16px;text-align:center}}
+.promo-modal{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.78);opacity:0;visibility:hidden;transition:opacity .2s ease}.promo-modal[hidden]{display:none}.promo-modal.is-open{opacity:1;visibility:visible}.promo-panel{width:min(92vw,440px);max-height:94vh;overflow:hidden;background:#050505;border:1px solid #b68a35;box-shadow:0 22px 70px rgba(0,0,0,.6)}.promo-image{display:block;width:100%;max-height:calc(94vh - 56px);object-fit:contain;background:#050505}.promo-actions{display:grid;grid-template-columns:1fr 1fr;height:56px;border-top:1px solid #73571e}.promo-actions button{border:0;background:#171717;color:#fff;font:inherit;font-size:14px;font-weight:800;cursor:pointer}.promo-actions button+button{border-left:1px solid #4c4c4c}.promo-actions button:hover,.promo-actions button:focus-visible{background:#b88b36;color:#111}.promo-open{overflow:hidden}
+@media(max-width:900px){.links{display:none}.nav{height:66px}.call{margin-left:auto}.hero{min-height:700px}.hero-in{padding-bottom:80px}.hero h1{font-size:45px}.hero p{font-size:16px}.quick-in{grid-template-columns:1fr 1fr}.overview-grid,.location-grid,.contact-box{grid-template-columns:1fr}.cards,.plan-grid{grid-template-columns:1fr}.title{font-size:36px}section{padding:78px 18px}.loc-list{grid-template-columns:1fr}.buttons{flex-direction:column;align-items:flex-start}footer{padding:44px 18px 108px}.foot-call{font-size:18px}.foot-call a{display:block;margin-top:5px;font-size:38px}.foot-notice,.foot-address{font-size:13px}.floating{left:16px;right:16px;text-align:center}.promo-modal{padding:10px}.promo-panel{width:min(94vw,420px);max-height:96vh}.promo-image{max-height:calc(96vh - 52px)}.promo-actions{height:52px}.promo-actions button{font-size:13px}}
 </style>
 </head>
 <body>
+<div class="promo-modal" id="openingPromotion" role="dialog" aria-modal="true" aria-label="속초 중앙하이츠 특별혜택 안내" hidden>
+<div class="promo-panel">
+<img class="promo-image" src="assets/opening-promotion.png" alt="속초 중앙하이츠 THE 228 특별혜택: 실입주금 0원, 잔금 30% 3년 유예, 즉시 입주 가능, 발코니 확장비 무상, 세컨드 홈 특별혜택">
+<div class="promo-actions"><button type="button" id="hidePromotionToday">오늘 하루 보지 않기</button><button type="button" id="closePromotion">닫기</button></div>
+</div>
+</div>
 <header><div class="nav">
 <a class="brand" href="#home">속초 중앙하이츠<small>THE 228 · SOKCHO</small></a>
 <nav class="links"><a href="#overview">사업개요</a><a href="#premium">프리미엄</a><a href="#location">입지환경</a><a href="#plans">타입안내</a><a href="#contact">상담신청</a></nav>
@@ -115,4 +122,35 @@ document.getElementById('leadForm').addEventListener('submit', async function(e)
 <p class="foot-notice foot-copy">Copyrights © 2026 속초 중앙하이츠 THE228. All Rights Reserved.</p>
 </div></footer>
 <a class="floating" href="tel:15447006">전화문의 1544-7006</a>
+<script>
+(function(){
+  const modal = document.getElementById('openingPromotion');
+  const dismissKey = 'sokchoPromotionHiddenUntil';
+  let hiddenUntil = 0;
+  try { hiddenUntil = Number(localStorage.getItem(dismissKey) || 0); } catch (_) {}
+
+  function closePromotion() {
+    modal.classList.remove('is-open');
+    document.body.classList.remove('promo-open');
+    window.setTimeout(() => { modal.hidden = true; }, 200);
+  }
+
+  if (Date.now() >= hiddenUntil) {
+    modal.hidden = false;
+    document.body.classList.add('promo-open');
+    window.requestAnimationFrame(() => modal.classList.add('is-open'));
+  }
+
+  document.getElementById('closePromotion').addEventListener('click', closePromotion);
+  document.getElementById('hidePromotionToday').addEventListener('click', function(){
+    const nextMidnight = new Date();
+    nextMidnight.setHours(24, 0, 0, 0);
+    try { localStorage.setItem(dismissKey, String(nextMidnight.getTime())); } catch (_) {}
+    closePromotion();
+  });
+  document.addEventListener('keydown', function(event){
+    if (event.key === 'Escape' && !modal.hidden) closePromotion();
+  });
+})();
+</script>
 </body></html>
