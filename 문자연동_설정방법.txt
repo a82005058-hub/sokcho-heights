@@ -1,0 +1,33 @@
+속초 중앙하이츠 THE 228 - 네이버 클라우드 SENS 문자연동 최종본
+
+[설정된 기능]
+1. 홈페이지 전화 버튼 → 대표번호 1544-7006으로 바로 전화 연결
+2. 상담/방문예약 폼 제출 → 010-8200-5058로 문자 알림
+3. 문자 서비스 → NAVER Cloud Platform SENS 사용
+
+[Vercel에 등록할 환경변수]
+Vercel 프로젝트 > Settings > Environment Variables에서 아래 항목을 등록합니다.
+
+NCP_ACCESS_KEY
+= 네이버 클라우드에서 만든 Access Key ID
+
+NCP_SECRET_KEY
+= 네이버 클라우드에서 만든 Secret Key
+
+NCP_SENS_SERVICE_ID
+= ncp:sms:kr:377763776657:sokcho-heights
+
+NCP_SENS_SENDER
+= 01082005058
+
+LEAD_RECEIVER
+= 01082005058
+
+중요: Access Key와 Secret Key는 홈페이지 코드에 직접 적지 말고 Vercel 환경변수에만 입력합니다.
+
+[현재 상태]
+네이버 SENS 발신번호 01082005058의 승인이 완료되어야 실제 문자가 발송됩니다.
+승인 전에도 홈페이지 배포와 환경변수 등록은 미리 할 수 있습니다.
+
+[승인 후 테스트]
+홈페이지 상담신청에 이름/연락처/방문희망 내용을 입력 → 상담신청 클릭 → 010-8200-5058 휴대폰에서 문자 수신 확인
