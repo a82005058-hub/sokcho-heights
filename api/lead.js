@@ -8,6 +8,31 @@ function clean(value, max = 500) {
     .slice(0, max);
 }
 
+async function redisCommand(command) {
+  const url = process.env.KV_REST_API_URL;
+  const token = process.env.KV_REST_API_TOKEN;
+  if (!url || !token) throw new Error('상담목록 저장소 환경변수가 없습니다.');
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(command)
+  });
+  const payload = await response.json();
+  if (!response.ok || payload.error) {
+    throw new Error(payload.error || `Redis ${response.status}`);
+  }
+  return payload.result;
+}
+
+async function saveLead(lead) {
+  await redisCommand(['SET', `sokcho:lead:${lead.id}`, JSON.stringify(lead)]);
+  await redisCommand(['ZADD', 'sokcho:leads', String(Date.parse(lead.createdAt)), lead.id]);
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -32,6 +57,23 @@ module.exports = async function handler(req, res) {
 
   if (!accessKey || !secretKey || !serviceId || !sender || !receiver) {
     return res.status(500).json({ error: '문자 서비스 환경변수 설정이 필요합니다.' });
+  }
+
+  const lead = {
+    id: crypto.randomUUID(),
+    createdAt: new Date().toISOString(),
+    name,
+    phone,
+    type: type && type !== '관심 타입 선택' ? type : '-',
+    message: message || '-',
+    smsStatus: 'pending'
+  };
+
+  try {
+    await saveLead(lead);
+  } catch (err) {
+    console.error('Lead save failed', err && err.message ? err.message : err);
+    return res.status(500).json({ error: '상담신청 저장 중 오류가 발생했습니다.' });
   }
 
   const smsText = [
@@ -77,14 +119,31 @@ module.exports = async function handler(req, res) {
 
     if (!response.ok) {
       console.error('NCP SENS send failed', response.status, result);
+      lead.smsStatus = 'failed';
+      lead.updatedAt = new Date().toISOString();
+      try { await saveLead(lead); } catch (saveError) {
+        console.error('Lead status update failed', saveError && saveError.message ? saveError.message : saveError);
+      }
       return res.status(502).json({
         error: '문자 발송에 실패했습니다. 발신번호 승인 및 Vercel 환경변수를 확인해주세요.'
       });
     }
 
+    lead.smsStatus = 'sent';
+    lead.smsRequestId = result.requestId || null;
+    lead.updatedAt = new Date().toISOString();
+    try { await saveLead(lead); } catch (saveError) {
+      console.error('Lead status update failed', saveError && saveError.message ? saveError.message : saveError);
+    }
+
     return res.status(200).json({ ok: true, requestId: result.requestId || null });
   } catch (err) {
     console.error('NCP SENS request error', err && err.message ? err.message : err);
+    lead.smsStatus = 'failed';
+    lead.updatedAt = new Date().toISOString();
+    try { await saveLead(lead); } catch (saveError) {
+      console.error('Lead status update failed', saveError && saveError.message ? saveError.message : saveError);
+    }
     return res.status(500).json({ error: '문자 발송 중 오류가 발생했습니다.' });
   }
 };
