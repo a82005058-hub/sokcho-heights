@@ -2,6 +2,7 @@ const crypto = require('crypto');
 
 const SESSION_COOKIE = '__Host-sokcho_admin';
 const SESSION_SECONDS = 8 * 60 * 60;
+const VISIT_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
 
 function safeEqual(left, right) {
   const a = Buffer.from(String(left || ''));
@@ -57,6 +58,53 @@ async function readLeads() {
   }).filter(Boolean);
 }
 
+async function readAdVisits() {
+  const cutoff = Date.now() - VISIT_RETENTION_MS;
+  await redisCommand(['ZREMRANGEBYSCORE', 'sokcho:visits', '-inf', String(cutoff)]);
+  const ids = await redisCommand(['ZREVRANGE', 'sokcho:visits', '0', '1999']);
+  if (!Array.isArray(ids) || !ids.length) return { visits: [], totalVisits: 0 };
+
+  const values = await redisCommand(['MGET', ...ids.map((id) => `sokcho:visit:${id}`)]);
+  const events = (Array.isArray(values) ? values : []).map((value) => {
+    try { return typeof value === 'string' ? JSON.parse(value) : value; } catch (_) { return null; }
+  }).filter((event) => event && event.ip && Date.parse(event.visitedAt) >= cutoff);
+
+  const grouped = new Map();
+  events.forEach((event) => {
+    let visit = grouped.get(event.ip);
+    if (!visit) {
+      visit = {
+        ip: event.ip,
+        count: 0,
+        firstAt: event.visitedAt,
+        lastAt: event.visitedAt,
+        keywords: new Set(),
+        ranks: new Set(),
+        devices: new Set()
+      };
+      grouped.set(event.ip, visit);
+    }
+    visit.count += 1;
+    if (Date.parse(event.visitedAt) < Date.parse(visit.firstAt)) visit.firstAt = event.visitedAt;
+    if (Date.parse(event.visitedAt) > Date.parse(visit.lastAt)) visit.lastAt = event.visitedAt;
+    if (event.keyword && event.keyword !== '-') visit.keywords.add(event.keyword);
+    if (event.rank && event.rank !== '-') visit.ranks.add(event.rank);
+    if (event.device) visit.devices.add(event.device);
+  });
+
+  const visits = Array.from(grouped.values()).map((visit) => ({
+    ip: visit.ip,
+    count: visit.count,
+    firstAt: visit.firstAt,
+    lastAt: visit.lastAt,
+    keywords: Array.from(visit.keywords).slice(0, 5),
+    ranks: Array.from(visit.ranks).slice(0, 5),
+    devices: Array.from(visit.devices)
+  })).sort((left, right) => right.count - left.count || Date.parse(right.lastAt) - Date.parse(left.lastAt));
+
+  return { visits, totalVisits: events.length };
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -73,8 +121,14 @@ module.exports = async function handler(req, res) {
       return res.status(401).json({ error: '로그인이 필요합니다.' });
     }
     try {
-      const leads = await readLeads();
-      return res.status(200).json({ ok: true, leads });
+      const [leads, visitData] = await Promise.all([readLeads(), readAdVisits()]);
+      return res.status(200).json({
+        ok: true,
+        leads,
+        adVisits: visitData.visits,
+        adVisitTotal: visitData.totalVisits,
+        adVisitRetentionDays: 7
+      });
     } catch (err) {
       console.error('Admin lead list failed', err && err.message ? err.message : err);
       return res.status(500).json({ error: '상담 목록을 불러오지 못했습니다.' });
